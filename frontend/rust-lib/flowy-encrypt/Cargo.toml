@@ -8,7 +8,7 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-aes-gcm = "0.10.2"
+aes-gcm = "0.10.3"
 rand = "0.8"
 pbkdf2 = "0.12.2"
 hmac = "0.12.1"
