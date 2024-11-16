@@ -25,7 +25,7 @@ const createWorkspaceButtonKey = ValueKey('createWorkspaceButton');
 @visibleForTesting
 const importNotionButtonKey = ValueKey('importNotinoButton');
 
-class WorkspacesMenu extends StatelessWidget {
+class WorkspacesMenu extends StatefulWidget {
   const WorkspacesMenu({
     super.key,
     required this.userProfile,
@@ -36,6 +36,19 @@ class WorkspacesMenu extends StatelessWidget {
   final UserProfilePB userProfile;
   final UserWorkspacePB currentWorkspace;
   final List<UserWorkspacePB> workspaces;
+
+  @override
+  State<WorkspacesMenu> createState() => _WorkspacesMenuState();
+}
+
+class _WorkspacesMenuState extends State<WorkspacesMenu> {
+  final ValueNotifier<bool> isShowingMoreActions = ValueNotifier(false);
+
+  @override
+  void dispose() {
+    isShowingMoreActions.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,13 +85,14 @@ class WorkspacesMenu extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                for (final workspace in workspaces) ...[
+                for (final workspace in widget.workspaces) ...[
                   WorkspaceMenuItem(
                     key: ValueKey(workspace.workspaceId),
                     workspace: workspace,
-                    userProfile: userProfile,
-                    isSelected:
-                        workspace.workspaceId == currentWorkspace.workspaceId,
+                    userProfile: widget.userProfile,
+                    isSelected: workspace.workspaceId ==
+                        widget.currentWorkspace.workspaceId,
+                    isShowingMoreActions: isShowingMoreActions,
                   ),
                   const VSpace(6.0),
                 ],
@@ -99,12 +113,12 @@ class WorkspacesMenu extends StatelessWidget {
   }
 
   String _getUserInfo() {
-    if (userProfile.email.isNotEmpty) {
-      return userProfile.email;
+    if (widget.userProfile.email.isNotEmpty) {
+      return widget.userProfile.email;
     }
 
-    if (userProfile.name.isNotEmpty) {
-      return userProfile.name;
+    if (widget.userProfile.name.isNotEmpty) {
+      return widget.userProfile.name;
     }
 
     return LocaleKeys.defaultUsername.tr();
@@ -117,11 +131,13 @@ class WorkspaceMenuItem extends StatefulWidget {
     required this.workspace,
     required this.userProfile,
     required this.isSelected,
+    required this.isShowingMoreActions,
   });
 
   final UserProfilePB userProfile;
   final UserWorkspacePB workspace;
   final bool isSelected;
+  final ValueNotifier<bool> isShowingMoreActions;
 
   @override
   State<WorkspaceMenuItem> createState() => _WorkspaceMenuItemState();
@@ -196,26 +212,26 @@ class _WorkspaceMenuItemState extends State<WorkspaceMenuItem> {
   }
 
   Widget _buildRightIcon(BuildContext context, ValueNotifier<bool> isHovered) {
-    // only the owner can update or delete workspace.
-    if (context.read<WorkspaceMemberBloc>().state.isLoading) {
-      return const SizedBox.shrink();
-    }
-
     return Row(
       children: [
-        ValueListenableBuilder(
-          valueListenable: isHovered,
-          builder: (context, value, child) {
-            return Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Opacity(
-                opacity: value ? 1.0 : 0.0,
-                child: child,
-              ),
-            );
-          },
-          child: WorkspaceMoreActionList(workspace: widget.workspace),
-        ),
+        // only the owner can update or delete workspace.
+        if (!context.read<WorkspaceMemberBloc>().state.isLoading)
+          ValueListenableBuilder(
+            valueListenable: isHovered,
+            builder: (context, value, child) {
+              return Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Opacity(
+                  opacity: value ? 1.0 : 0.0,
+                  child: child,
+                ),
+              );
+            },
+            child: WorkspaceMoreActionList(
+              workspace: widget.workspace,
+              isShowingMoreActions: widget.isShowingMoreActions,
+            ),
+          ),
         const HSpace(8.0),
         if (widget.isSelected) ...[
           const Padding(
@@ -244,43 +260,38 @@ class _WorkspaceInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<WorkspaceMemberBloc, WorkspaceMemberState>(
-      builder: (context, state) {
-        final members = state.members;
-        return FlowyButton(
-          onTap: () => _openWorkspace(context),
-          iconPadding: 10.0,
-          leftIconSize: const Size.square(32),
-          leftIcon: const SizedBox.square(dimension: 32),
-          rightIcon: const HSpace(32.0),
-          text: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // workspace name
-              FlowyText.medium(
-                workspace.name,
-                fontSize: 14.0,
-                figmaLineHeight: 17.0,
-                overflow: TextOverflow.ellipsis,
-                withTooltip: true,
-              ),
-              // workspace members count
-              FlowyText.regular(
-                state.isLoading
-                    ? ''
-                    : LocaleKeys.settings_appearance_members_membersCount
-                        .plural(
-                        members.length,
-                      ),
-                fontSize: 10.0,
-                figmaLineHeight: 12.0,
-                color: Theme.of(context).hintColor,
-              ),
-            ],
+    final memberCount = workspace.memberCount.toInt();
+    return FlowyButton(
+      onTap: () => _openWorkspace(context),
+      iconPadding: 10.0,
+      leftIconSize: const Size.square(32),
+      leftIcon: const SizedBox.square(dimension: 32),
+      rightIcon: const HSpace(32.0),
+      text: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // workspace name
+          FlowyText.medium(
+            workspace.name,
+            fontSize: 14.0,
+            figmaLineHeight: 17.0,
+            overflow: TextOverflow.ellipsis,
+            withTooltip: true,
           ),
-        );
-      },
+          // workspace members count
+          FlowyText.regular(
+            memberCount == 0
+                ? ''
+                : LocaleKeys.settings_appearance_members_membersCount.plural(
+                    memberCount,
+                  ),
+            fontSize: 10.0,
+            figmaLineHeight: 12.0,
+            color: Theme.of(context).hintColor,
+          ),
+        ],
+      ),
     );
   }
 
