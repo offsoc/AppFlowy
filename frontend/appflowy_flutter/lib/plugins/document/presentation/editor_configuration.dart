@@ -5,10 +5,6 @@ import 'package:appflowy/plugins/document/presentation/editor_page.dart';
 import 'package:appflowy/plugins/document/presentation/editor_plugins/actions/mobile_block_action_buttons.dart';
 import 'package:appflowy/plugins/document/presentation/editor_plugins/code_block/code_block_copy_button.dart';
 import 'package:appflowy/plugins/document/presentation/editor_plugins/plugins.dart';
-import 'package:appflowy/plugins/document/presentation/editor_plugins/table/simple_table_block_component.dart';
-import 'package:appflowy/plugins/document/presentation/editor_plugins/table/simple_table_cell_block_component.dart';
-import 'package:appflowy/plugins/document/presentation/editor_plugins/table/simple_table_row_block_component.dart';
-import 'package:appflowy/plugins/document/presentation/editor_plugins/table/table_operations/table_operations.dart';
 import 'package:appflowy/plugins/document/presentation/editor_style.dart';
 import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:appflowy_editor_plugins/appflowy_editor_plugins.dart';
@@ -18,6 +14,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:universal_platform/universal_platform.dart';
+
+/// The node types that support slash menu.
+final Set<String> supportSlashMenuNodeTypes = {
+  ParagraphBlockKeys.type,
+  HeadingBlockKeys.type,
+
+  // Lists
+  TodoListBlockKeys.type,
+  BulletedListBlockKeys.type,
+  NumberedListBlockKeys.type,
+  QuoteBlockKeys.type,
+  ToggleListBlockKeys.type,
+
+  // Simple table
+  // SimpleTableBlockKeys.type,
+  // SimpleTableRowBlockKeys.type,
+  // SimpleTableCellBlockKeys.type,
+};
 
 /// Build the block component builders.
 ///
@@ -129,9 +143,13 @@ void _customBlockOptionActions(
     final actions = _buildOptionActions(context, entry.key);
 
     if (UniversalPlatform.isDesktop) {
-      builder.showActions = (node) =>
-          node.parent?.type != TableCellBlockKeys.type &&
-          node.parent?.type != SimpleTableCellBlockKeys.type;
+      builder.showActions = (node) {
+        final parentTableNode = node.parentTableNode;
+        if (node.type != SimpleTableBlockKeys.type && parentTableNode != null) {
+          return false;
+        }
+        return true;
+      };
       builder.configuration = builder.configuration.copyWith(
         blockSelectionAreaMargin: (_) => const EdgeInsets.symmetric(
           vertical: 1,
@@ -147,6 +165,8 @@ void _customBlockOptionActions(
             level > 0) {
           final offset = [14.0, 11.0, 8.0, 6.0, 4.0, 2.0];
           top += offset[level - 1];
+        } else if (type == SimpleTableBlockKeys.type) {
+          top += 8.0;
         } else {
           top += 2.0;
         }
@@ -162,7 +182,9 @@ void _customBlockOptionActions(
                 ? () => customSlashCommand(
                       slashMenuItems,
                       shouldInsertSlash: false,
+                      deleteKeywordsByDefault: true,
                       style: styleCustomizer.selectionMenuStyleBuilder(),
+                      supportSlashMenuNodeTypes: supportSlashMenuNodeTypes,
                     ).handler.call(editorState)
                 : () {},
           ),
@@ -317,7 +339,17 @@ SimpleTableBlockComponentBuilder _buildSimpleTableBlockComponentBuilder(
   BuildContext context,
   BlockComponentConfiguration configuration,
 ) {
-  return SimpleTableBlockComponentBuilder(configuration: configuration);
+  final copiedConfiguration = configuration.copyWith(
+    padding: (node) {
+      final padding = configuration.padding(node);
+      if (UniversalPlatform.isDesktop) {
+        return padding;
+      } else {
+        return padding.copyWith(right: padding.left);
+      }
+    },
+  );
+  return SimpleTableBlockComponentBuilder(configuration: copiedConfiguration);
 }
 
 SimpleTableRowBlockComponentBuilder _buildSimpleTableRowBlockComponentBuilder(
@@ -420,10 +452,19 @@ NumberedListBlockComponentBuilder _buildNumberedListBlockComponentBuilder(
         return configuration.textStyle(node);
       },
     ),
-    iconBuilder: (_, node, textDirection) => NumberedListIcon(
-      node: node,
-      textDirection: textDirection,
-    ),
+    iconBuilder: (_, node, textDirection) {
+      TextStyle? textStyle;
+      if (node.isInHeaderColumn || node.isInHeaderRow) {
+        textStyle = configuration.textStyle(node).copyWith(
+              fontWeight: FontWeight.bold,
+            );
+      }
+      return NumberedListIcon(
+        node: node,
+        textDirection: textDirection,
+        textStyle: textStyle,
+      );
+    },
   );
 }
 

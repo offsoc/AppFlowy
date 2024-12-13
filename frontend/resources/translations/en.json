@@ -477,7 +477,7 @@
         "clickToOpenPageInBrowser": "Open page in browser"
       },
       "error": {
-        "failedToGeneratePaymentLink": "Failed to generate payment link for pro plan",
+        "failedToGeneratePaymentLink": "Failed to generate payment link for Pro Plan",
         "failedToUpdateNamespace": "Failed to update namespace",
         "proPlanLimitation": "You need to upgrade to Pro Plan to update the namespace",
         "namespaceAlreadyInUse": "The namespace is already taken, please try another one",
@@ -1036,6 +1036,8 @@
       "syncSetting": "Sync Setting",
       "cloudSettings": "Cloud Settings",
       "enableSync": "Enable sync",
+      "enableSyncLog": "Enable sync logging",
+      "enableSyncLogWarning": "Thank you for helping diagnose sync issues. This will log your document edits to a local file. Please quit and reopen the app after enabling",
       "enableEncrypt": "Encrypt data",
       "cloudURL": "Base URL",
       "invalidCloudURLScheme": "Invalid Scheme",
@@ -1511,6 +1513,7 @@
       "copyProperty": "Copied property to clipboard",
       "count": "Count",
       "newRow": "New row",
+      "loadMore": "Load more",
       "action": "Action",
       "add": "Click add to below",
       "drag": "Drag to move",
@@ -1723,7 +1726,9 @@
           "insertBelow": "Insert below",
           "headerColumn": "Header column",
           "headerRow": "Header row",
-          "clearContents": "Clear contents"
+          "clearContents": "Clear contents",
+          "setToPageWidth": "Set to page width",
+          "distributeColumnsWidth": "Distribute columns evenly"
         },
         "clickToAddNewRow": "Click to add a new row",
         "clickToAddNewColumn": "Click to add a new column",
@@ -2887,11 +2892,21 @@
   },
   "tabMenu": {
     "close": "Close",
+    "closeDisabledHint": "Cannot close a pinned tab, please unpin first",
     "closeOthers": "Close other tabs",
+    "closeOthersHint": "This will close all unpinned tabs except this one",
+    "closeOthersDisabledHint": "All tabs are pinned, cannot find any tabs to close",
     "favorite": "Favorite",
     "unfavorite": "Unfavorite",
     "favoriteDisabledHint": "Cannot favorite this view",
     "pinTab": "Pin",
     "unpinTab": "Unpin"
+  },
+  "openFileMessage": {
+    "success": "File opened successfully",
+    "fileNotFound": "File not found",
+    "noAppToOpenFile": "No app to open this file",
+    "permissionDenied": "No permission to open this file",
+    "unknownError": "File open failed"
   }
 }

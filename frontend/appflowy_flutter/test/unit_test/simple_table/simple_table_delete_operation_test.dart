@@ -1,4 +1,4 @@
-import 'package:appflowy/plugins/document/presentation/editor_plugins/table/table_operations/table_operations.dart';
+import 'package:appflowy/plugins/document/presentation/editor_plugins/simple_table/simple_table.dart';
 import 'package:appflowy_backend/log.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -67,7 +67,7 @@ void main() {
         align: TableAlign.center,
       );
       expect(tableNode.rowAligns, {
-        '1': TableAlign.center.name,
+        '1': TableAlign.center.key,
       });
       await editorState.deleteRowInTable(tableNode, 1);
       expect(tableNode.rowLength, 2);
@@ -96,7 +96,7 @@ void main() {
         align: TableAlign.center,
       );
       expect(tableNode.rowAligns, {
-        '1': TableAlign.center.name,
+        '1': TableAlign.center.key,
       });
       await editorState.deleteRowInTable(tableNode, 0);
       expect(tableNode.rowLength, 2);
@@ -105,7 +105,7 @@ void main() {
         '0': '0xFF0000FF',
       });
       expect(tableNode.rowAligns, {
-        '0': TableAlign.center.name,
+        '0': TableAlign.center.key,
       });
     });
 
@@ -129,7 +129,7 @@ void main() {
         align: TableAlign.center,
       );
       expect(tableNode.columnAligns, {
-        '1': TableAlign.center.name,
+        '1': TableAlign.center.key,
       });
       await editorState.deleteColumnInTable(tableNode, 1);
       expect(tableNode.rowLength, 3);
@@ -158,7 +158,7 @@ void main() {
         align: TableAlign.center,
       );
       expect(tableNode.columnAligns, {
-        '1': TableAlign.center.name,
+        '1': TableAlign.center.key,
       });
       await editorState.deleteColumnInTable(tableNode, 0);
       expect(tableNode.rowLength, 3);
@@ -167,7 +167,7 @@ void main() {
         '0': '0xFF0000FF',
       });
       expect(tableNode.columnAligns, {
-        '0': TableAlign.center.name,
+        '0': TableAlign.center.key,
       });
     });
   });

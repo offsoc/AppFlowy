@@ -1,5 +1,4 @@
-import 'package:appflowy/plugins/document/presentation/editor_plugins/table/simple_table_constants.dart';
-import 'package:appflowy/plugins/document/presentation/editor_plugins/table/table_operations/table_operations.dart';
+import 'package:appflowy/plugins/document/presentation/editor_plugins/simple_table/simple_table.dart';
 import 'package:appflowy_backend/log.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -101,9 +100,9 @@ void main() {
         );
       }
       expect(tableNode.columnAligns, {
-        '0': TableAlign.center.name,
-        '1': TableAlign.center.name,
-        '2': TableAlign.center.name,
+        '0': TableAlign.center.key,
+        '1': TableAlign.center.key,
+        '2': TableAlign.center.key,
       });
     });
 
@@ -125,8 +124,8 @@ void main() {
       }
 
       expect(tableNode.rowAligns, {
-        '0': TableAlign.center.name,
-        '1': TableAlign.center.name,
+        '0': TableAlign.center.key,
+        '1': TableAlign.center.key,
       });
     });
 
